@@ -5155,19 +5155,19 @@ enum nl80211_plink_state {
 };
 
 /**
- * enum nl80211_plink_actions - actions to perform in mesh peers
+ * enum nl80211_plink_action - actions to perform in mesh peers
  *
  * @NL80211_PLINK_ACTION_NO_ACTION: perform no action
  * @NL80211_PLINK_ACTION_OPEN: start mesh peer link establishment
  * @NL80211_PLINK_ACTION_BLOCK: block traffic from this mesh peer
  * @NUM_NL80211_PLINK_ACTIONS: number of possible actions
  */
-enum nl80211_plink_actions {
+enum nl80211_plink_action {
 	NL80211_PLINK_ACTION_NO_ACTION,
 	NL80211_PLINK_ACTION_OPEN,
 	NL80211_PLINK_ACTION_BLOCK,
 
-	NUM_NL80211_PLINK_ACTIONS,
+	NUM_NL80211_PLINK_ACTION,
 };
 
 
