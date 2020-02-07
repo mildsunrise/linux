@@ -6133,7 +6133,7 @@ enum nl80211_ftm_responder_attributes {
 	NL80211_FTM_RESP_ATTR_MAX = __NL80211_FTM_RESP_ATTR_LAST - 1,
 };
 
-/*
+/**
  * enum nl80211_ftm_responder_stats - FTM responder statistics
  *
  * These attribute types are used with %NL80211_ATTR_FTM_RESPONDER_STATS
