@@ -136,7 +136,8 @@
 #define AIC2_IRQ_CFG		0x2000
 
 /*
- * AIC2 registers are laid out like this, starting at AIC2_IRQ_CFG:
+ * AIC2/AIC3 "external interrupt" registers are laid out like this,
+ * starting at irq_cfg:
  *
  * Repeat for each die:
  *   IRQ_CFG: u32 * MAX_IRQS
@@ -152,6 +153,9 @@
  * capability registers, so we have to explicitly specify the event
  * register as a second reg entry in the device tree to remain
  * forward-compatible.
+ *
+ * In AIC3, the event registers are no longer in the page immediately
+ * following the external interrupt registers.
  */
 
 #define AIC2_IRQ_CFG_TARGET	GENMASK(3, 0)
