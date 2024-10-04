@@ -84,6 +84,8 @@ properties:
       - apple,blizzard
       - apple,cyclone
       - apple,firestorm
+      - apple,sawtooth
+      - apple,everest
       - apple,hurricane-zephyr
       - apple,icestorm
       - apple,mistral
