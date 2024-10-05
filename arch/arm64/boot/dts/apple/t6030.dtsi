@@ -276,6 +276,15 @@
 		/* Required to get >32-bit DMA via DARTs */
 		dma-ranges = <0 0 0 0 0xffffffff 0xffffc000>;
 
+		fpwm0: pwm@289040000 {
+			compatible = "apple,t6030-fpwm", "apple,s5l-fpwm";
+			reg = <0x2 0x89040000 0x0 0x4000>;
+			power-domains = <&ps_fpwm0>;
+			clocks = <&clkref>;
+			#pwm-cells = <2>;
+			status = "disabled";
+		};
+
 		serial0: serial@289200000 {
 			compatible = "apple,s5l-uart";
 			reg = <0x2 0x89200000 0x0 0x4000>;
