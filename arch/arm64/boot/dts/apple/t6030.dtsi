@@ -10,6 +10,8 @@
 #include <dt-bindings/interrupt-controller/apple-aic.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 
+#include "multi-die-cpp.h"
+
 / {
 	compatible = "apple,t6030", "apple,arm-platform";
 
@@ -347,4 +349,10 @@
 	};
 };
 
-#include "t6030-pmgr.dtsi"
+#define DIE
+#define DIE_NO 0
+
+#include "t603x-pmgr.dtsi"
+
+#undef DIE
+#undef DIE_NO
