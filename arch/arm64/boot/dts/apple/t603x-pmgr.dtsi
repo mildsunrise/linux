@@ -6,118 +6,6 @@
  */
 
 &pmgr {
-	DIE_NODE(ps_ecpu0): power-controller@0 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x0 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(ecpu0);
-	};
-
-	DIE_NODE(ps_ecpu1): power-controller@8 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x8 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(ecpu1);
-	};
-
-	DIE_NODE(ps_ecpu2): power-controller@10 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x10 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(ecpu2);
-	};
-
-	DIE_NODE(ps_ecpu3): power-controller@18 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x18 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(ecpu3);
-	};
-
-	DIE_NODE(ps_ecpu4): power-controller@20 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x20 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(ecpu4);
-	};
-
-	DIE_NODE(ps_ecpu5): power-controller@28 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x28 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(ecpu5);
-	};
-
-	DIE_NODE(ps_pcpu0): power-controller@30 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x30 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pcpu0);
-	};
-
-	DIE_NODE(ps_pcpu1): power-controller@38 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x38 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pcpu1);
-	};
-
-	DIE_NODE(ps_pcpu2): power-controller@40 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x40 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pcpu2);
-	};
-
-	DIE_NODE(ps_pcpu3): power-controller@48 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x48 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pcpu3);
-	};
-
-	DIE_NODE(ps_pcpu4): power-controller@50 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x50 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pcpu4);
-	};
-
-	DIE_NODE(ps_pcpu5): power-controller@58 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x58 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pcpu5);
-	};
-
-	DIE_NODE(ps_ecpm): power-controller@60 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x60 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(ecpm);
-	};
-
-	DIE_NODE(ps_pcpm): power-controller@68 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x68 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pcpm);
-	};
-
 	DIE_NODE(ps_msg): power-controller@108 {
 		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
 		reg = <0x108 4>;
@@ -133,6 +21,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(aic);
+		apple,always-on; /* Core device */
 	};
 
 	DIE_NODE(ps_dwi): power-controller@118 {
@@ -149,46 +38,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(gpio);
-	};
-
-	DIE_NODE(ps_pms_fpwm0): power-controller@138 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x138 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pms_fpwm0);
-	};
-
-	DIE_NODE(ps_pms_fpwm1): power-controller@140 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x140 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pms_fpwm1);
-	};
-
-	DIE_NODE(ps_pms_fpwm2): power-controller@148 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x148 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pms_fpwm2);
-	};
-
-	DIE_NODE(ps_pms_fpwm3): power-controller@150 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x150 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pms_fpwm3);
-	};
-
-	DIE_NODE(ps_pms_fpwm4): power-controller@158 {
-		compatible = "apple,t6030-pmgr-pwrstate", "apple,pmgr-pwrstate";
-		reg = <0x158 4>;
-		#power-domain-cells = <0>;
-		#reset-cells = <0>;
-		label = DIE_LABEL(pms_fpwm4);
 	};
 
 	DIE_NODE(ps_pms_c1ppt): power-controller@160 {
@@ -254,7 +103,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(sio);
-		power-domains = <&DIE_NODE(ps_lw00)>;
 	};
 
 	DIE_NODE(ps_disp_sys): power-controller@1c0 {
@@ -263,7 +111,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(disp_sys);
-		power-domains = <&DIE_NODE(ps_lw00)>;
 	};
 
 	DIE_NODE(ps_jpg): power-controller@1c8 {
@@ -272,7 +119,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(jpg);
-		power-domains = <&DIE_NODE(ps_lw00)>;
 	};
 
 	DIE_NODE(ps_sio_cpu): power-controller@1d0 {
@@ -587,7 +433,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dpa0);
-		apple,always-on;
 		power-domains = <&DIE_NODE(ps_audio_p)>;
 	};
 
@@ -597,7 +442,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dpa1);
-		apple,always-on;
 		power-domains = <&DIE_NODE(ps_audio_p)>;
 	};
 
@@ -607,7 +451,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dpa2);
-		apple,always-on;
 		power-domains = <&DIE_NODE(ps_audio_p)>;
 	};
 
@@ -617,7 +460,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dpa3);
-		apple,always-on;
 		power-domains = <&DIE_NODE(ps_audio_p)>;
 	};
 
@@ -627,7 +469,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dpa4);
-		apple,always-on;
 		power-domains = <&DIE_NODE(ps_audio_p)>;
 	};
 
@@ -647,7 +488,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs0);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc0)>;
 	};
 
 	DIE_NODE(ps_dcs2): power-controller@328 {
@@ -657,7 +497,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs2);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc0)>;
 	};
 
 	DIE_NODE(ps_dcs1): power-controller@330 {
@@ -667,7 +506,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs1);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc0)>;
 	};
 
 	DIE_NODE(ps_dcs3): power-controller@338 {
@@ -677,7 +515,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs3);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc0)>;
 	};
 
 	DIE_NODE(ps_dcs4): power-controller@340 {
@@ -687,7 +524,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs4);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc0)>;
 	};
 
 	DIE_NODE(ps_dcs5): power-controller@348 {
@@ -697,7 +533,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs5);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc0)>;
 	};
 
 	DIE_NODE(ps_dcs6): power-controller@358 {
@@ -707,7 +542,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs6);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
 	DIE_NODE(ps_dcs7): power-controller@360 {
@@ -717,7 +551,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs7);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
 	DIE_NODE(ps_dcs8): power-controller@368 {
@@ -727,7 +560,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs8);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
 	DIE_NODE(ps_dcs9): power-controller@370 {
@@ -737,7 +569,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs9);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
 	DIE_NODE(ps_dcs10): power-controller@378 {
@@ -747,7 +578,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs10);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
 	DIE_NODE(ps_dcs11): power-controller@380 {
@@ -757,7 +587,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs11);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
 	DIE_NODE(ps_mca1): power-controller@388 {
@@ -794,7 +623,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(ioa1);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_afi)>;
 	};
 
 	DIE_NODE(ps_ls1): power-controller@3a8 {
@@ -912,7 +740,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(avd_sys);
-		power-domains = <&DIE_NODE(ps_lw20)>;
 	};
 
 	DIE_NODE(ps_ane_sys): power-controller@498 {
@@ -921,7 +748,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(ane_sys);
-		power-domains = <&DIE_NODE(ps_lw20)>;
 	};
 
 	DIE_NODE(ps_scodec): power-controller@4a0 {
@@ -930,7 +756,6 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(scodec);
-		power-domains = <&DIE_NODE(ps_lw20)>;
 	};
 
 	DIE_NODE(ps_scodec_stream): power-controller@4a8 {
@@ -949,7 +774,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(ioa3);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_afi)>;
 	};
 
 	DIE_NODE(ps_ls3): power-controller@4b8 {
@@ -1140,6 +964,7 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(apcie_sys_gp);
 		power-domains = <&DIE_NODE(ps_apcie_gp)>;
+		apple,always-on; /* Breaks things if shut down */
 	};
 
 	DIE_NODE(ps_msr_ase_core): power-controller@560 {
@@ -1248,6 +1073,7 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(apcie_phy_sw);
 		power-domains = <&DIE_NODE(ps_apcie_sys_st)>, <&DIE_NODE(ps_apcie_sys_gp)>;
+		apple,always-on; /* macOS does not turn this off */
 	};
 
 	DIE_NODE(ps_sep): power-controller@c00 {
@@ -1257,7 +1083,6 @@
 		#reset-cells = <0>;
 		label = DIE_LABEL(sep);
 		apple,always-on;
-		power-domains = <&DIE_NODE(ps_lw00)>;
 	};
 
 	DIE_NODE(ps_isp_cpu): power-controller@4000 {
@@ -1475,6 +1300,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(atc0_usb_aon);
+		apple,always-on; /* Needs to stay on for dwc3 to work */
 	};
 
 	DIE_NODE(ps_atc1_usb_aon): power-controller@c0 {
@@ -1483,6 +1309,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(atc1_usb_aon);
+		apple,always-on; /* Needs to stay on for dwc3 to work */
 	};
 
 	DIE_NODE(ps_atc2_usb_aon): power-controller@c8 {
@@ -1491,6 +1318,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(atc2_usb_aon);
+		apple,always-on; /* Needs to stay on for dwc3 to work */
 	};
 
 	DIE_NODE(ps_atc3_usb_aon): power-controller@d0 {
@@ -1499,6 +1327,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(atc3_usb_aon);
+		apple,always-on; /* Needs to stay on for dwc3 to work */
 	};
 
 	DIE_NODE(ps_atc0_usb): power-controller@d8 {

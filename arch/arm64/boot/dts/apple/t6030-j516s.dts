@@ -31,7 +31,7 @@
 			reg = <0 0 0 0>; /* To be filled by loader */
 			/* Format properties will be added by loader */
 			status = "disabled";
-			//power-domains = <&ps_disp0_cpu0>; FIXME
+			power-domains = <&ps_disp_cpu>;
 			//panel = &panel; FIXME
 		};
 	};
