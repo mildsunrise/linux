@@ -18,6 +18,10 @@
 	model = "Apple MacBook Pro (16-inch, M3 Pro, 2023)";
 
 	aliases {
+		atcphy0 = &atcphy0;
+		atcphy1 = &atcphy1;
+		atcphy2 = &atcphy2;
+		atcphy3 = &atcphy3;
 		serial0 = &serial0;
 	};
 
@@ -69,4 +73,39 @@
 
 &fpwm0 {
 	status = "okay";
+};
+
+&atcphy3 {
+	apple,mode-fixed-dp;
+};
+
+&atcphy3_xbar {
+	status = "okay";
+};
+
+// TODO: USB-C controller
+
+// Disabled for now since t6030 doesn't include those nodes...
+// enable once generalized to other SoCs that have USB on ATC3
+#if 0
+/* ATC3 is used for DisplayPort -> HDMI only */
+&dwc3_3_dart_0 {
+	status = "disabled";
+};
+
+&dwc3_3_dart_1 {
+	status = "disabled";
+};
+
+&dwc3_3 {
+	status = "disabled";
+};
+/* Delete unused dwc3_3 to prevent dt_disable_missing_devs() from disabling
+ * atcphy3 via phandle references from a disablecd device.
+ */
+/delete-node/ &dwc3_3;
+#endif
+
+&ps_atc3_usb_aon {
+	/delete-property/ apple,always-on;
 };

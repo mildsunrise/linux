@@ -9,6 +9,7 @@
 
 #include <dt-bindings/interrupt-controller/apple-aic.h>
 #include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/phy/phy.h>
 
 #include "multi-die-cpp.h"
 
@@ -333,6 +334,219 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 			reg = <0x3 0x64280000 0 0x4000>;
+		};
+
+		dwc3_0_dart_0: iommu@702f00000 {
+			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			reg = <0x7 0x02f00000 0x0 0x4000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1091 IRQ_TYPE_LEVEL_HIGH>;
+			power-domains = <&ps_atc0_usb>;
+			#iommu-cells = <1>;
+		};
+
+		dwc3_0_dart_1: iommu@702f80000 {
+			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			reg = <0x7 0x02f80000 0x0 0x4000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1091 IRQ_TYPE_LEVEL_HIGH>;
+			power-domains = <&ps_atc0_usb>;
+			#iommu-cells = <1>;
+		};
+
+		dwc3_0: usb@702280000 {
+			compatible = "apple,t6030-dwc3", "apple,dwc3", "snps,dwc3";
+			reg = <0x7 0x02280000 0x0 0x100000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1087 IRQ_TYPE_LEVEL_HIGH>;
+			dr_mode = "otg";
+			usb-role-switch;
+			role-switch-default-mode = "host";
+			iommus = <&dwc3_0_dart_0 0>,
+				<&dwc3_0_dart_1 1>;
+			power-domains = <&ps_atc0_usb>;
+			dma-coherent;
+			resets = <&atcphy0>;
+			phys = <&atcphy0 PHY_TYPE_USB2>, <&atcphy0 PHY_TYPE_USB3>;
+			phy-names = "usb2-phy", "usb3-phy";
+		};
+
+		atcphy0: phy@703000000 {
+			compatible = "apple,t6030-atcphy", "apple,t8103-atcphy";
+			reg = <0x7 0x03000000 0x0 0x4c000>,
+				<0x7 0x03050000 0x0 0x8000>,
+				<0x7 0x00000000 0x0 0x4000>,
+				<0x7 0x02a90000 0x0 0x4000>,
+				<0x7 0x02a84000 0x0 0x4000>;
+			reg-names = "core", "lpdptx", "axi2af", "usb2phy",
+				"pipehandler";
+
+			#phy-cells = <1>;
+			#reset-cells = <0>;
+
+			orientation-switch;
+			mode-switch;
+			svid = <0xff01>, <0x8087>;
+			power-domains = <&ps_atc0_usb>;
+		};
+
+		atcphy0_xbar: mux@70304c000 {
+			compatible = "apple,t6030-display-crossbar";
+			reg = <0x7 0x0304c000 0x0 0x4000>;
+			#mux-control-cells = <1>;
+			power-domains = <&ps_atc0_usb>;
+			status = "disabled";
+		};
+
+		dwc3_1_dart_0: iommu@b02f00000 {
+			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			reg = <0xb 0x02f00000 0x0 0x4000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1149 IRQ_TYPE_LEVEL_HIGH>;
+			power-domains = <&ps_atc1_usb>;
+			#iommu-cells = <1>;
+		};
+
+		dwc3_1_dart_1: iommu@b02f80000 {
+			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			reg = <0xb 0x02f80000 0x0 0x4000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1149 IRQ_TYPE_LEVEL_HIGH>;
+			power-domains = <&ps_atc1_usb>;
+			#iommu-cells = <1>;
+		};
+
+		dwc3_1: usb@b02280000 {
+			compatible = "apple,t6030-dwc3", "apple,dwc3", "snps,dwc3";
+			reg = <0xb 0x02280000 0x0 0x100000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1145 IRQ_TYPE_LEVEL_HIGH>;
+			dr_mode = "otg";
+			usb-role-switch;
+			role-switch-default-mode = "host";
+			iommus = <&dwc3_1_dart_0 0>,
+				<&dwc3_1_dart_1 1>;
+			power-domains = <&ps_atc1_usb>;
+			dma-coherent;
+			resets = <&atcphy1>;
+			phys = <&atcphy1 PHY_TYPE_USB2>, <&atcphy1 PHY_TYPE_USB3>;
+			phy-names = "usb2-phy", "usb3-phy";
+		};
+
+		atcphy1: phy@b03000000 {
+			compatible = "apple,t6030-atcphy", "apple,t8103-atcphy";
+			reg = <0xb 0x03000000 0x0 0x4c000>,
+				<0xb 0x03050000 0x0 0x8000>,
+				<0xb 0x00000000 0x0 0x4000>,
+				<0xb 0x02a90000 0x0 0x4000>,
+				<0xb 0x02a84000 0x0 0x4000>;
+			reg-names = "core", "lpdptx", "axi2af", "usb2phy",
+				"pipehandler";
+
+			#phy-cells = <1>;
+			#reset-cells = <0>;
+
+			orientation-switch;
+			mode-switch;
+			svid = <0xff01>, <0x8087>;
+			power-domains = <&ps_atc1_usb>;
+		};
+
+		atcphy1_xbar: mux@b0304c000 {
+			compatible = "apple,t6030-display-crossbar";
+			reg = <0xb 0x0304c000 0x0 0x4000>;
+			#mux-control-cells = <1>;
+			power-domains = <&ps_atc1_usb>;
+			status = "disabled";
+		};
+
+		dwc3_2_dart_0: iommu@f02f00000 {
+			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			reg = <0xf 0x02f00000 0x0 0x4000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1207 IRQ_TYPE_LEVEL_HIGH>;
+			power-domains = <&ps_atc2_usb>;
+			#iommu-cells = <1>;
+		};
+
+		dwc3_2_dart_1: iommu@f02f80000 {
+			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			reg = <0xf 0x02f80000 0x0 0x4000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1207 IRQ_TYPE_LEVEL_HIGH>;
+			power-domains = <&ps_atc2_usb>;
+			#iommu-cells = <1>;
+		};
+
+		dwc3_2: usb@f02280000 {
+			compatible = "apple,t6030-dwc3", "apple,dwc3", "snps,dwc3";
+			reg = <0xf 0x02280000 0x0 0x100000>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 1203 IRQ_TYPE_LEVEL_HIGH>;
+			dr_mode = "otg";
+			usb-role-switch;
+			role-switch-default-mode = "host";
+			iommus = <&dwc3_2_dart_0 0>,
+				<&dwc3_2_dart_1 1>;
+			power-domains = <&ps_atc2_usb>;
+			dma-coherent;
+			resets = <&atcphy2>;
+			phys = <&atcphy2 PHY_TYPE_USB2>, <&atcphy2 PHY_TYPE_USB3>;
+			phy-names = "usb2-phy", "usb3-phy";
+		};
+
+		atcphy2: phy@f03000000 {
+			compatible = "apple,t6030-atcphy", "apple,t8103-atcphy";
+			reg = <0xf 0x03000000 0x0 0x4c000>,
+				<0xf 0x03050000 0x0 0x8000>,
+				<0xf 0x00000000 0x0 0x4000>,
+				<0xf 0x02a90000 0x0 0x4000>,
+				<0xf 0x02a84000 0x0 0x4000>;
+			reg-names = "core", "lpdptx", "axi2af", "usb2phy",
+				"pipehandler";
+
+			#phy-cells = <1>;
+			#reset-cells = <0>;
+
+			orientation-switch;
+			mode-switch;
+			svid = <0xff01>, <0x8087>;
+			power-domains = <&ps_atc2_usb>;
+		};
+
+		atcphy2_xbar: mux@f0304c000 {
+			compatible = "apple,t6030-display-crossbar";
+			reg = <0xf 0x0304c000 0x0 0x4000>;
+			#mux-control-cells = <1>;
+			power-domains = <&ps_atc2_usb>;
+			status = "disabled";
+		};
+
+		atcphy3: phy@1303000000 {
+			compatible = "apple,t6030-atcphy", "apple,t8103-atcphy";
+			reg = <0x13 0x03000000 0x0 0x4c000>,
+				<0x13 0x03050000 0x0 0x8000>,
+				<0x13 0x00000000 0x0 0x4000>,
+				<0x13 0x02a90000 0x0 0x4000>,
+				<0x13 0x02a84000 0x0 0x4000>;
+			reg-names = "core", "lpdptx", "axi2af", "usb2phy",
+				"pipehandler";
+
+			#phy-cells = <1>;
+			#reset-cells = <0>;
+
+			orientation-switch;
+			mode-switch;
+			svid = <0xff01>, <0x8087>;
+			power-domains = <&ps_atc3_usb>;
+		};
+
+		atcphy3_xbar: mux@130304c000 {
+			compatible = "apple,t6030-display-crossbar";
+			reg = <0x13 0x0304c000 0x0 0x4000>;
+			#mux-control-cells = <1>;
+			power-domains = <&ps_atc3_usb>;
+			status = "disabled";
 		};
 	};
 
