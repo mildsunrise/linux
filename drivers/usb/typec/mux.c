@@ -13,6 +13,7 @@
 #include <linux/mutex.h>
 #include <linux/property.h>
 #include <linux/slab.h>
+#include <linux/usb/typec_altmode.h>
 
 #include "class.h"
 #include "mux.h"
@@ -161,6 +162,49 @@ const struct device_type typec_switch_dev_type = {
 	.release = typec_switch_release,
 };
 
+static ssize_t switch_state_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t n)
+{
+	struct typec_switch_dev *sw = to_typec_switch_dev(dev);
+	ssize_t			ret;
+	enum typec_orientation orientation;
+
+	if (sysfs_streq(buf, "none")) {
+		orientation = TYPEC_ORIENTATION_NONE;
+	} else if (sysfs_streq(buf, "normal")) {
+		orientation = TYPEC_ORIENTATION_NORMAL;
+	} else if (sysfs_streq(buf, "reverse")) {
+		orientation = TYPEC_ORIENTATION_REVERSE;
+	} else {
+		dev_err(dev, "unsupported orientation '%s'\n", buf);
+		ret = -EINVAL;
+		goto out;
+	}
+
+	ret = sw->set(sw, orientation);
+	if (ret >= 0)
+		ret = n;
+
+out:
+	return ret;
+}
+
+static DEVICE_ATTR_WO(switch_state);
+
+static struct attribute *typec_switch_attrs[] = {
+	&dev_attr_switch_state.attr,
+	NULL,
+};
+
+static const struct attribute_group typec_switch_attr_group = {
+	.attrs = typec_switch_attrs,
+};
+
+static const struct attribute_group *typec_switch_attr_groups[] = {
+	&typec_switch_attr_group,
+	NULL,
+};
+
 /**
  * typec_switch_register - Register USB Type-C orientation switch
  * @parent: Parent device
@@ -191,6 +235,7 @@ typec_switch_register(struct device *parent,
 	sw_dev->dev.parent = parent;
 	sw_dev->dev.fwnode = desc->fwnode;
 	sw_dev->dev.class = &typec_mux_class;
+	sw_dev->dev.groups = typec_switch_attr_groups;
 	sw_dev->dev.type = &typec_switch_dev_type;
 	sw_dev->dev.driver_data = desc->drvdata;
 	ret = dev_set_name(&sw_dev->dev, "%s-switch", desc->name ? desc->name : dev_name(parent));
@@ -406,6 +451,47 @@ const struct device_type typec_mux_dev_type = {
 	.release = typec_mux_release,
 };
 
+static ssize_t mux_state_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t n)
+{
+	struct typec_mux_dev *mux = to_typec_mux_dev(dev);
+	ssize_t			ret;
+	struct typec_mux_state state = { NULL, 0, NULL };
+
+	if (sysfs_streq(buf, "off")) {
+		state.mode = TYPEC_STATE_SAFE;
+	} else if (sysfs_streq(buf, "usb")) {
+		state.mode = TYPEC_STATE_USB;
+	} else {
+		dev_err(dev, "unsupported state '%s'\n", buf);
+		ret = -EINVAL;
+		goto out;
+	}
+
+	ret = mux->set(mux, &state);
+	if (ret >= 0)
+		ret = n;
+
+out:
+	return ret;
+}
+
+static DEVICE_ATTR_WO(mux_state);
+
+static struct attribute *typec_mux_attrs[] = {
+	&dev_attr_mux_state.attr,
+	NULL,
+};
+
+static const struct attribute_group typec_mux_attr_group = {
+	.attrs = typec_mux_attrs,
+};
+
+static const struct attribute_group *typec_mux_attr_groups[] = {
+	&typec_mux_attr_group,
+	NULL,
+};
+
 /**
  * typec_mux_register - Register Multiplexer routing USB Type-C pins
  * @parent: Parent device
@@ -435,6 +521,7 @@ typec_mux_register(struct device *parent, const struct typec_mux_desc *desc)
 	mux_dev->dev.parent = parent;
 	mux_dev->dev.fwnode = desc->fwnode;
 	mux_dev->dev.class = &typec_mux_class;
+	mux_dev->dev.groups = typec_mux_attr_groups;
 	mux_dev->dev.type = &typec_mux_dev_type;
 	mux_dev->dev.driver_data = desc->drvdata;
 	ret = dev_set_name(&mux_dev->dev, "%s-mux", desc->name ? desc->name : dev_name(parent));
