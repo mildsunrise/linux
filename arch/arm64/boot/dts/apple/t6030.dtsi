@@ -367,8 +367,9 @@
 			power-domains = <&ps_atc0_usb>;
 			dma-coherent;
 			resets = <&atcphy0>;
-			phys = <&atcphy0 PHY_TYPE_USB2>, <&atcphy0 PHY_TYPE_USB3>;
-			phy-names = "usb2-phy", "usb3-phy";
+			maximum-speed = "high-speed";
+			phys = <&atcphy0 PHY_TYPE_USB2>;
+			phy-names = "usb2-phy";
 		};
 
 		atcphy0: phy@703000000 {
@@ -429,8 +430,9 @@
 			power-domains = <&ps_atc1_usb>;
 			dma-coherent;
 			resets = <&atcphy1>;
-			phys = <&atcphy1 PHY_TYPE_USB2>, <&atcphy1 PHY_TYPE_USB3>;
-			phy-names = "usb2-phy", "usb3-phy";
+			maximum-speed = "high-speed";
+			phys = <&atcphy1 PHY_TYPE_USB2>;
+			phy-names = "usb2-phy";
 		};
 
 		atcphy1: phy@b03000000 {
@@ -491,8 +493,9 @@
 			power-domains = <&ps_atc2_usb>;
 			dma-coherent;
 			resets = <&atcphy2>;
-			phys = <&atcphy2 PHY_TYPE_USB2>, <&atcphy2 PHY_TYPE_USB3>;
-			phy-names = "usb2-phy", "usb3-phy";
+			maximum-speed = "high-speed";
+			phys = <&atcphy2 PHY_TYPE_USB2>;
+			phy-names = "usb2-phy";
 		};
 
 		atcphy2: phy@f03000000 {

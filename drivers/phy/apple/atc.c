@@ -2100,7 +2100,7 @@ static void atcphy_mux_set_work(struct work_struct *work)
 	case APPLE_ATCPHY_MODE_USB2:
 	case APPLE_ATCPHY_MODE_OFF:
 		atcphy->mode = APPLE_ATCPHY_MODE_OFF;
-		atcphy_disable_dp_aux(atcphy);
+		//atcphy_disable_dp_aux(atcphy);
 		atcphy_cio_power_off(atcphy);
 	}
 
@@ -2208,8 +2208,8 @@ static int atcphy_parse_tunable(struct apple_atcphy *atcphy,
 				const char *name)
 {
 	if (!of_find_property(atcphy->np, name, NULL)) {
-		dev_err(atcphy->dev, "tunable %s not found\n", name);
-		return -ENOENT;
+		//dev_err(atcphy->dev, "tunable %s not found\n", name);
+		return 0;
 	}
 
 	return atcphy_parse_legacy_tunable(atcphy, tunable, name);
