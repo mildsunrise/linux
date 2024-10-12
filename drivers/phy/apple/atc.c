@@ -1748,7 +1748,7 @@ static int atcphy_usb2_set_mode(struct phy *phy, enum phy_mode mode,
 	case PHY_MODE_USB_DEVICE_HS:
 	case PHY_MODE_USB_DEVICE_SS:
 		clear32(atcphy->regs.usb2phy + USB2PHY_SIG, USB2PHY_SIG_HOST);
-		clear32(atcphy->regs.usb2phy + USB2PHY_USBCTL,
+		set32(atcphy->regs.usb2phy + USB2PHY_USBCTL,
 			USB2PHY_USBCTL_HOST_EN);
 		ret = 0;
 		break;
