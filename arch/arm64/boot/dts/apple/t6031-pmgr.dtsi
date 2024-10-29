@@ -603,6 +603,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_04);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
@@ -612,6 +613,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_05);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
@@ -621,6 +623,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_06);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
@@ -630,6 +633,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_07);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc1)>;
 	};
 
@@ -639,6 +643,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_12);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc3)>;
 	};
 
@@ -648,6 +653,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_13);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc3)>;
 	};
 
@@ -657,6 +663,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_14);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc3)>;
 	};
 
@@ -666,6 +673,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_15);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc3)>;
 	};
 
@@ -675,6 +683,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_20);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc5)>;
 	};
 
@@ -684,6 +693,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_21);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc5)>;
 	};
 
@@ -693,6 +703,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_22);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc5)>;
 	};
 
@@ -702,6 +713,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_23);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc5)>;
 	};
 
@@ -711,6 +723,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_28);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc7)>;
 	};
 
@@ -720,6 +733,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_29);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc7)>;
 	};
 
@@ -729,6 +743,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_30);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc7)>;
 	};
 
@@ -738,6 +753,7 @@
 		#power-domain-cells = <0>;
 		#reset-cells = <0>;
 		label = DIE_LABEL(dcs_31);
+        apple,always-on;
 		power-domains = <&DIE_NODE(ps_amcc7)>;
 	};
 
