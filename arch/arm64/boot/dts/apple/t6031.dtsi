@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0+ OR MIT
 /*
- * Apple T6030 "M3 Pro" SoC
+ * Apple T6031 "M3 Max" SoC
  *
- * Other names: H15J, "Lobos"
+ * Other names: H15J, "Palma"
  *
  * Copyright The Asahi Linux Contributors
  */
@@ -14,7 +14,7 @@
 #include "multi-die-cpp.h"
 
 / {
-	compatible = "apple,t6030", "apple,arm-platform";
+	compatible = "apple,t6031", "apple,arm-platform";
 
 	#address-cells = <2>;
 	#size-cells = <2>;
@@ -26,48 +26,63 @@
 		cpu-map {
 			cluster0 {
 				core0 {
-					cpu = <&cpu_e0>;
+					cpu = <&cpu_e00>;
 				};
 				core1 {
-					cpu = <&cpu_e1>;
+					cpu = <&cpu_e01>;
 				};
 				core2 {
-					cpu = <&cpu_e2>;
+					cpu = <&cpu_e02>;
 				};
 				core3 {
-					cpu = <&cpu_e3>;
-				};
-				core4 {
-					cpu = <&cpu_e4>;
-				};
-				core5 {
-					cpu = <&cpu_e5>;
+					cpu = <&cpu_e03>;
 				};
 			};
 
 			cluster1 {
 				core0 {
-					cpu = <&cpu_p0>;
+					cpu = <&cpu_p10>;
 				};
 				core1 {
-					cpu = <&cpu_p1>;
+					cpu = <&cpu_p11>;
 				};
 				core2 {
-					cpu = <&cpu_p2>;
+					cpu = <&cpu_p12>;
 				};
 				core3 {
-					cpu = <&cpu_p3>;
+					cpu = <&cpu_p13>;
 				};
 				core4 {
-					cpu = <&cpu_p4>;
+					cpu = <&cpu_p14>;
 				};
 				core5 {
-					cpu = <&cpu_p5>;
+					cpu = <&cpu_p15>;
+				};
+			};
+
+			cluster2 {
+				core0 {
+					cpu = <&cpu_p20>;
+				};
+				core1 {
+					cpu = <&cpu_p21>;
+				};
+				core2 {
+					cpu = <&cpu_p22>;
+				};
+				core3 {
+					cpu = <&cpu_p23>;
+				};
+				core4 {
+					cpu = <&cpu_p24>;
+				};
+				core5 {
+					cpu = <&cpu_p25>;
 				};
 			};
 		};
 
-		cpu_e0: cpu@0 {
+		cpu_e00: cpu@0 {
 			compatible = "apple,sawtooth";
 			device_type = "cpu";
 			reg = <0x0 0x0>;
@@ -81,7 +96,7 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_e1: cpu@1 {
+		cpu_e01: cpu@1 {
 			compatible = "apple,sawtooth";
 			device_type = "cpu";
 			reg = <0x0 0x1>;
@@ -95,7 +110,7 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_e2: cpu@2 {
+		cpu_e02: cpu@2 {
 			compatible = "apple,sawtooth";
 			device_type = "cpu";
 			reg = <0x0 0x2>;
@@ -109,7 +124,7 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_e3: cpu@3 {
+		cpu_e03: cpu@3 {
 			compatible = "apple,sawtooth";
 			device_type = "cpu";
 			reg = <0x0 0x3>;
@@ -123,35 +138,7 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_e4: cpu@4 {
-			compatible = "apple,sawtooth";
-			device_type = "cpu";
-			reg = <0x0 0x4>;
-			enable-method = "spin-table";
-			cpu-release-addr = <0 0>; /* to be filled by loader */
-			next-level-cache = <&l2_cache_0>;
-			i-cache-size  = <0x20000>;
-			d-cache-size = <0x10000>;
-			//operating-points-v2 = <&sawtooth_opp>;
-			//capacity-dmips-mhz = <756>;
-			//performance-domains = <&cpufreq_e_die1>;
-		};
-
-		cpu_e5: cpu@5 {
-			compatible = "apple,sawtooth";
-			device_type = "cpu";
-			reg = <0x0 0x5>;
-			enable-method = "spin-table";
-			cpu-release-addr = <0 0>; /* to be filled by loader */
-			next-level-cache = <&l2_cache_0>;
-			i-cache-size  = <0x20000>;
-			d-cache-size = <0x10000>;
-			//operating-points-v2 = <&sawtooth_opp>;
-			//capacity-dmips-mhz = <756>;
-			//performance-domains = <&cpufreq_e_die1>;
-		};
-
-		cpu_p0: cpu@10100 {
+		cpu_p10: cpu@10100 {
 			compatible = "apple,everest";
 			device_type = "cpu";
 			reg = <0x0 0x10100>;
@@ -165,7 +152,7 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_p1: cpu@10101 {
+		cpu_p11: cpu@10101 {
 			compatible = "apple,everest";
 			device_type = "cpu";
 			reg = <0x0 0x10101>;
@@ -179,7 +166,7 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_p2: cpu@10102 {
+		cpu_p12: cpu@10102 {
 			compatible = "apple,everest";
 			device_type = "cpu";
 			reg = <0x0 0x10102>;
@@ -193,7 +180,7 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_p3: cpu@10103 {
+		cpu_p13: cpu@10103 {
 			compatible = "apple,everest";
 			device_type = "cpu";
 			reg = <0x0 0x10103>;
@@ -207,7 +194,7 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_p4: cpu@10104 {
+		cpu_p14: cpu@10104 {
 			compatible = "apple,everest";
 			device_type = "cpu";
 			reg = <0x0 0x10104>;
@@ -221,13 +208,97 @@
 			//performance-domains = <&cpufreq_e_die1>;
 		};
 
-		cpu_p5: cpu@10105 {
+		cpu_p15: cpu@10105 {
 			compatible = "apple,everest";
 			device_type = "cpu";
 			reg = <0x0 0x10105>;
 			enable-method = "spin-table";
 			cpu-release-addr = <0 0>; /* to be filled by loader */
 			next-level-cache = <&l2_cache_1>;
+			i-cache-size  = <0x30000>;
+			d-cache-size = <0x20000>;
+			//operating-points-v2 = <&everest_opp>;
+			//capacity-dmips-mhz = <756>;
+			//performance-domains = <&cpufreq_e_die1>;
+		};
+
+		cpu_p20: cpu@10200 {
+			compatible = "apple,everest";
+			device_type = "cpu";
+			reg = <0x0 0x10200>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0 0>; /* to be filled by loader */
+			next-level-cache = <&l2_cache_2>;
+			i-cache-size  = <0x30000>;
+			d-cache-size = <0x20000>;
+			//operating-points-v2 = <&everest_opp>;
+			//capacity-dmips-mhz = <756>;
+			//performance-domains = <&cpufreq_e_die1>;
+		};
+
+		cpu_p21: cpu@10201 {
+			compatible = "apple,everest";
+			device_type = "cpu";
+			reg = <0x0 0x10201>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0 0>; /* to be filled by loader */
+			next-level-cache = <&l2_cache_2>;
+			i-cache-size  = <0x30000>;
+			d-cache-size = <0x20000>;
+			//operating-points-v2 = <&everest_opp>;
+			//capacity-dmips-mhz = <756>;
+			//performance-domains = <&cpufreq_e_die1>;
+		};
+
+		cpu_p22: cpu@10202 {
+			compatible = "apple,everest";
+			device_type = "cpu";
+			reg = <0x0 0x10202>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0 0>; /* to be filled by loader */
+			next-level-cache = <&l2_cache_2>;
+			i-cache-size  = <0x30000>;
+			d-cache-size = <0x20000>;
+			//operating-points-v2 = <&everest_opp>;
+			//capacity-dmips-mhz = <756>;
+			//performance-domains = <&cpufreq_e_die1>;
+		};
+
+		cpu_p23: cpu@10203 {
+			compatible = "apple,everest";
+			device_type = "cpu";
+			reg = <0x0 0x10203>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0 0>; /* to be filled by loader */
+			next-level-cache = <&l2_cache_2>;
+			i-cache-size  = <0x30000>;
+			d-cache-size = <0x20000>;
+			//operating-points-v2 = <&everest_opp>;
+			//capacity-dmips-mhz = <756>;
+			//performance-domains = <&cpufreq_e_die1>;
+		};
+
+		cpu_p24: cpu@10204 {
+			compatible = "apple,everest";
+			device_type = "cpu";
+			reg = <0x0 0x10204>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0 0>; /* to be filled by loader */
+			next-level-cache = <&l2_cache_2>;
+			i-cache-size  = <0x30000>;
+			d-cache-size = <0x20000>;
+			//operating-points-v2 = <&everest_opp>;
+			//capacity-dmips-mhz = <756>;
+			//performance-domains = <&cpufreq_e_die1>;
+		};
+
+		cpu_p25: cpu@10205 {
+			compatible = "apple,everest";
+			device_type = "cpu";
+			reg = <0x0 0x10205>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0 0>; /* to be filled by loader */
+			next-level-cache = <&l2_cache_2>;
 			i-cache-size  = <0x30000>;
 			d-cache-size = <0x20000>;
 			//operating-points-v2 = <&everest_opp>;
@@ -243,6 +314,13 @@
 		};
 
 		l2_cache_1: l2-cache-1 {
+			compatible = "cache";
+			cache-level = <2>;
+			cache-unified;
+			cache-size = <0x1000000>;
+		};
+
+		l2_cache_2: l2-cache-2 {
 			compatible = "cache";
 			cache-level = <2>;
 			cache-unified;
@@ -277,21 +355,55 @@
 		/* Required to get >32-bit DMA via DARTs */
 		dma-ranges = <0 0 0 0 0xffffffff 0xffffc000>;
 
-		fpwm0: pwm@289040000 {
-			compatible = "apple,t6030-fpwm", "apple,s5l-fpwm";
-			reg = <0x2 0x89040000 0x0 0x4000>;
+		pmgr0: power-management@292280000 {
+			compatible = "apple,t6031-pmgr", "apple,pmgr", "syscon", "simple-mfd";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0x2 0x92280000 0 0xc000>;
+		};
+
+		aic: interrupt-controller@292400000 {
+			compatible = "apple,t6031-aic", "apple,aic3";
+			#interrupt-cells = <4>;
+			interrupt-controller;
+			reg = <0x2 0x92400000 0x0 0x18000>,
+				  <0x2 0x92440000 0x0 0x1000>;
+			reg-names = "core", "event";
+			cap0-offset = <4>;
+			maxnumirq-offset = <12>;
+			config-offset = <0x10000>;
+			power-domains = <&ps_aic>;
+		};
+
+		pmgr1: power-management@292800000 {
+			compatible = "apple,t6031-pmgr", "apple,pmgr", "syscon", "simple-mfd";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0x2 0x92800000 0 0x4000>;
+		};
+
+		pmgr_mini: power-management@2a0280000 {
+			compatible = "apple,t6031-pmgr", "apple,pmgr", "syscon", "simple-mfd";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			reg = <0x2 0xa0280000 0 0x4000>;
+		};
+
+		fpwm0: pwm@391040000 {
+			compatible = "apple,t6031-fpwm", "apple,s5l-fpwm";
+			reg = <0x3 0x91040000 0x0 0x4000>;
 			power-domains = <&ps_fpwm0>;
 			clocks = <&clkref>;
 			#pwm-cells = <2>;
 			status = "disabled";
 		};
 
-		serial0: serial@289200000 {
+		serial0: serial@391200000 {
 			compatible = "apple,s5l-uart";
-			reg = <0x2 0x89200000 0x0 0x4000>;
+			reg = <0x3 0x91200000 0x0 0x4000>;
 			reg-io-width = <4>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 866 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1303 IRQ_TYPE_LEVEL_HIGH>;
 			/*
 			* TODO: figure out the clocking properly, there may
 			* be a third selectable clock.
@@ -302,63 +414,36 @@
 			status = "disabled";
 		};
 
-		pmgr_gfx: power-management@290e80000 {
-			compatible = "apple,t6030-pmgr", "apple,pmgr", "syscon", "simple-mfd";
+		pmgr_gfx: power-management@408e80000 {
+			compatible = "apple,t6031-pmgr", "apple,pmgr", "syscon", "simple-mfd";
 			#address-cells = <1>;
 			#size-cells = <1>;
-			reg = <0x2 0x90e80000 0 0x4000>;
-		};
-
-		pmgr: power-management@350700000 {
-			compatible = "apple,t6030-pmgr", "apple,pmgr", "syscon", "simple-mfd";
-			#address-cells = <1>;
-			#size-cells = <1>;
-			reg = <0x3 0x50700000 0 0x10000>;
-		};
-
-		aic: interrupt-controller@351000000 {
-			compatible = "apple,t6030-aic", "apple,aic3";
-			#interrupt-cells = <4>;
-			interrupt-controller;
-			reg = <0x3 0x51000000 0x0 0x18000>,
-				  <0x3 0x51040000 0x0 0x1000>;
-			reg-names = "core", "event";
-			cap0-offset = <4>;
-			maxnumirq-offset = <12>;
-			config-offset = <0x10000>;
-			power-domains = <&ps_aic>;
-		};
-
-		pmgr_mini: power-management@364280000 {
-			compatible = "apple,t6030-pmgr", "apple,pmgr", "syscon", "simple-mfd";
-			#address-cells = <1>;
-			#size-cells = <1>;
-			reg = <0x3 0x64280000 0 0x4000>;
+			reg = <0x4 0x8e80000 0 0x4000>;
 		};
 
 		dwc3_0_dart_0: iommu@702f00000 {
-			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			compatible = "apple,t6031-dart", "apple,t8110-dart";
 			reg = <0x7 0x02f00000 0x0 0x4000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1091 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1366 IRQ_TYPE_LEVEL_HIGH>;
 			power-domains = <&ps_atc0_usb>;
 			#iommu-cells = <1>;
 		};
 
 		dwc3_0_dart_1: iommu@702f80000 {
-			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			compatible = "apple,t6031-dart", "apple,t8110-dart";
 			reg = <0x7 0x02f80000 0x0 0x4000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1091 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1366 IRQ_TYPE_LEVEL_HIGH>;
 			power-domains = <&ps_atc0_usb>;
 			#iommu-cells = <1>;
 		};
 
 		dwc3_0: usb@702280000 {
-			compatible = "apple,t6030-dwc3", "apple,dwc3", "snps,dwc3";
+			compatible = "apple,t6031-dwc3", "apple,dwc3", "snps,dwc3";
 			reg = <0x7 0x02280000 0x0 0x100000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1087 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1362 IRQ_TYPE_LEVEL_HIGH>;
 			dr_mode = "otg";
 			usb-role-switch;
 			role-switch-default-mode = "host";
@@ -373,7 +458,7 @@
 		};
 
 		atcphy0: phy@703000000 {
-			compatible = "apple,t6030-atcphy", "apple,t8103-atcphy";
+			compatible = "apple,t6031-atcphy", "apple,t8103-atcphy";
 			reg = <0x7 0x03000000 0x0 0x4c000>,
 				<0x7 0x03050000 0x0 0x8000>,
 				<0x7 0x00000000 0x0 0x4000>,
@@ -392,7 +477,7 @@
 		};
 
 		atcphy0_xbar: mux@70304c000 {
-			compatible = "apple,t6030-display-crossbar";
+			compatible = "apple,t6031-display-crossbar";
 			reg = <0x7 0x0304c000 0x0 0x4000>;
 			#mux-control-cells = <1>;
 			power-domains = <&ps_atc0_usb>;
@@ -400,28 +485,28 @@
 		};
 
 		dwc3_1_dart_0: iommu@b02f00000 {
-			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			compatible = "apple,t6031-dart", "apple,t8110-dart";
 			reg = <0xb 0x02f00000 0x0 0x4000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1149 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1394 IRQ_TYPE_LEVEL_HIGH>;
 			power-domains = <&ps_atc1_usb>;
 			#iommu-cells = <1>;
 		};
 
 		dwc3_1_dart_1: iommu@b02f80000 {
-			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			compatible = "apple,t6031-dart", "apple,t8110-dart";
 			reg = <0xb 0x02f80000 0x0 0x4000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1149 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1394 IRQ_TYPE_LEVEL_HIGH>;
 			power-domains = <&ps_atc1_usb>;
 			#iommu-cells = <1>;
 		};
 
 		dwc3_1: usb@b02280000 {
-			compatible = "apple,t6030-dwc3", "apple,dwc3", "snps,dwc3";
+			compatible = "apple,t6031-dwc3", "apple,dwc3", "snps,dwc3";
 			reg = <0xb 0x02280000 0x0 0x100000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1145 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1390 IRQ_TYPE_LEVEL_HIGH>;
 			dr_mode = "otg";
 			usb-role-switch;
 			role-switch-default-mode = "host";
@@ -436,7 +521,7 @@
 		};
 
 		atcphy1: phy@b03000000 {
-			compatible = "apple,t6030-atcphy", "apple,t8103-atcphy";
+			compatible = "apple,t6031-atcphy", "apple,t8103-atcphy";
 			reg = <0xb 0x03000000 0x0 0x4c000>,
 				<0xb 0x03050000 0x0 0x8000>,
 				<0xb 0x00000000 0x0 0x4000>,
@@ -455,7 +540,7 @@
 		};
 
 		atcphy1_xbar: mux@b0304c000 {
-			compatible = "apple,t6030-display-crossbar";
+			compatible = "apple,t6031-display-crossbar";
 			reg = <0xb 0x0304c000 0x0 0x4000>;
 			#mux-control-cells = <1>;
 			power-domains = <&ps_atc1_usb>;
@@ -463,28 +548,28 @@
 		};
 
 		dwc3_2_dart_0: iommu@f02f00000 {
-			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			compatible = "apple,t6031-dart", "apple,t8110-dart";
 			reg = <0xf 0x02f00000 0x0 0x4000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1207 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1422 IRQ_TYPE_LEVEL_HIGH>;
 			power-domains = <&ps_atc2_usb>;
 			#iommu-cells = <1>;
 		};
 
 		dwc3_2_dart_1: iommu@f02f80000 {
-			compatible = "apple,t6030-dart", "apple,t8110-dart";
+			compatible = "apple,t6031-dart", "apple,t8110-dart";
 			reg = <0xf 0x02f80000 0x0 0x4000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1207 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1422 IRQ_TYPE_LEVEL_HIGH>;
 			power-domains = <&ps_atc2_usb>;
 			#iommu-cells = <1>;
 		};
 
 		dwc3_2: usb@f02280000 {
-			compatible = "apple,t6030-dwc3", "apple,dwc3", "snps,dwc3";
+			compatible = "apple,t6031-dwc3", "apple,dwc3", "snps,dwc3";
 			reg = <0xf 0x02280000 0x0 0x100000>;
 			interrupt-parent = <&aic>;
-			interrupts = <AIC_IRQ 0 1203 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts = <AIC_IRQ 0 1418 IRQ_TYPE_LEVEL_HIGH>;
 			dr_mode = "otg";
 			usb-role-switch;
 			role-switch-default-mode = "host";
@@ -499,7 +584,7 @@
 		};
 
 		atcphy2: phy@f03000000 {
-			compatible = "apple,t6030-atcphy", "apple,t8103-atcphy";
+			compatible = "apple,t6031-atcphy", "apple,t8103-atcphy";
 			reg = <0xf 0x03000000 0x0 0x4c000>,
 				<0xf 0x03050000 0x0 0x8000>,
 				<0xf 0x00000000 0x0 0x4000>,
@@ -518,7 +603,7 @@
 		};
 
 		atcphy2_xbar: mux@f0304c000 {
-			compatible = "apple,t6030-display-crossbar";
+			compatible = "apple,t6031-display-crossbar";
 			reg = <0xf 0x0304c000 0x0 0x4000>;
 			#mux-control-cells = <1>;
 			power-domains = <&ps_atc2_usb>;
@@ -526,7 +611,7 @@
 		};
 
 		atcphy3: phy@1303000000 {
-			compatible = "apple,t6030-atcphy", "apple,t8103-atcphy";
+			compatible = "apple,t6031-atcphy", "apple,t8103-atcphy";
 			reg = <0x13 0x03000000 0x0 0x4c000>,
 				<0x13 0x03050000 0x0 0x8000>,
 				<0x13 0x00000000 0x0 0x4000>,
@@ -545,7 +630,7 @@
 		};
 
 		atcphy3_xbar: mux@130304c000 {
-			compatible = "apple,t6030-display-crossbar";
+			compatible = "apple,t6031-display-crossbar";
 			reg = <0x13 0x0304c000 0x0 0x4000>;
 			#mux-control-cells = <1>;
 			power-domains = <&ps_atc3_usb>;
@@ -578,7 +663,7 @@
 #define DIE
 #define DIE_NO 0
 
-#include "t6030-pmgr.dtsi"
+#include "t6031-pmgr.dtsi"
 
 #undef DIE
 #undef DIE_NO
@@ -588,12 +673,13 @@
 	affinities {
 		e-core-pmu-affinity {
 			apple,fiq-index = <AIC_CPU_PMU_E>;
-			cpus = <&cpu_e0 &cpu_e1 &cpu_e2 &cpu_e3 &cpu_e4 &cpu_e5>;
+			cpus = <&cpu_e00 &cpu_e01 &cpu_e02 &cpu_e03>;
 		};
 
 		p-core-pmu-affinity {
 			apple,fiq-index = <AIC_CPU_PMU_P>;
-			cpus = <&cpu_p0 &cpu_p1 &cpu_p2 &cpu_p3 &cpu_p4 &cpu_p5>;
+			cpus = <&cpu_p10 &cpu_p11 &cpu_p12 &cpu_p13 &cpu_p14 &cpu_p15
+				&cpu_p20 &cpu_p21 &cpu_p22 &cpu_p23 &cpu_p24 &cpu_p25>;
 		};
 	};
 };
