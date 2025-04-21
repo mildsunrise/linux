@@ -977,6 +977,10 @@ static int __dwc3_gadget_ep_enable(struct dwc3_ep *dep, unsigned int action)
 		dma_addr_t trb_dma;
 		u32 cmd;
 
+		if (usb_endpoint_xfer_int(desc)) {
+			dev_err(dwc->dev, "refusing to transfer data on INT endpoint %u", (u32)dep->number);
+			goto out;
+		}
 		memset(&params, 0, sizeof(params));
 		trb = &dep->trb_pool[0];
 		trb_dma = dwc3_trb_dma_offset(dep, trb);
@@ -1711,6 +1715,9 @@ static int __dwc3_gadget_kick_transfer(struct dwc3_ep *dep)
 		cmd = DWC3_DEPCMD_UPDATETRANSFER |
 			DWC3_DEPCMD_PARAM(dep->resource_index);
 	}
+
+	if (usb_endpoint_xfer_int(dep->endpoint.desc))
+		return 0;
 
 	ret = dwc3_send_gadget_ep_cmd(dep, cmd, &params);
 	if (ret < 0) {
