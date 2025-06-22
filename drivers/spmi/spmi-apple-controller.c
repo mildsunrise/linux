@@ -79,6 +79,11 @@ static int spmi_read_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
 
 	/* Read SPMI data reply */
 	while (len_read < len) {
+		if (readl(spmi->regs + SPMI_STATUS_REG) & SPMI_RX_FIFO_EMPTY) {
+			/* a bug in the driver might've desync'ed the controller's FSM */
+			dev_err(&ctrl->dev, "FIFO lacks reply data, controller stuck?\n");
+			return -EIO;
+		}
 		rsp = readl(spmi->regs + SPMI_RSP_REG);
 		i = 0;
 		while ((len_read < len) && (i < 4)) {
@@ -86,6 +91,10 @@ static int spmi_read_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
 			i += 1;
 		}
 	}
+
+	if (!(readl(spmi->regs + SPMI_STATUS_REG) & SPMI_RX_FIFO_EMPTY))
+		/* a bug in the driver might've desync'ed the controller's FSM */
+		dev_warn(&ctrl->dev, "FIFO has extra data\n");
 
 	return 0;
 }
@@ -115,6 +124,10 @@ static int spmi_write_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
 
 	/* Discard */
 	readl(spmi->regs + SPMI_RSP_REG);
+
+	if (!(readl(spmi->regs + SPMI_STATUS_REG) & SPMI_RX_FIFO_EMPTY))
+		/* a bug in the driver might've desync'ed the controller's FSM */
+		dev_warn(&ctrl->dev, "FIFO has extra data\n");
 
 	return 0;
 }
