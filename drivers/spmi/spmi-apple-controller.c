@@ -64,58 +64,13 @@ static int apple_spmi_wait_rx_not_empty(struct spmi_controller *ctrl)
 	return 0;
 }
 
-/* Send a raw command with 1..16 input data frames */
-static int spmi_raw_cmd_input(struct spmi_controller *ctrl, u8 opc, u8 sid,
-			 u16 param, u8 *buf, size_t len)
+static int spmi_raw_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
+			 u16 param, const u8 *buf, size_t len, u8 *ibuf, size_t ilen)
 {
 	struct apple_spmi *spmi = spmi_controller_get_drvdata(ctrl);
 	u32 spmi_cmd = apple_spmi_pack_cmd(opc, sid, param);
 	u32 reply, rsp;
 	size_t len_read = 0;
-	u8 i;
-	int ret;
-
-	writel(spmi_cmd, spmi->regs + SPMI_CMD_REG);
-
-	ret = apple_spmi_wait_rx_not_empty(ctrl);
-	if (ret)
-		return ret;
-
-	reply = readl(spmi->regs + SPMI_RSP_REG);
-
-	/* Read SPMI data reply */
-	while (len_read < len) {
-		if (readl(spmi->regs + SPMI_STATUS_REG) & SPMI_RX_FIFO_EMPTY) {
-			/* a bug in the driver might've desync'ed the controller's FSM */
-			dev_err(&ctrl->dev, "FIFO lacks reply data, controller stuck?\n");
-			return -EIO;
-		}
-		rsp = readl(spmi->regs + SPMI_RSP_REG);
-		i = 0;
-		while ((len_read < len) && (i < 4)) {
-			buf[len_read++] = ((0xff << (8 * i)) & rsp) >> (8 * i);
-			i += 1;
-		}
-	}
-
-	if (!(readl(spmi->regs + SPMI_STATUS_REG) & SPMI_RX_FIFO_EMPTY))
-		/* a bug in the driver might've desync'ed the controller's FSM */
-		dev_warn(&ctrl->dev, "FIFO has extra data\n");
-
-	if ((~reply >> SPMI_REPLY_FRAME_PARITY_OFFSET) & ((1 << len) - 1)) {
-		dev_err(&ctrl->dev, "some frames failed parity check\n");
-		return -EIO;
-	}
-	return 0;
-}
-
-/* Send a raw command with (optional) body and an input ACK */
-static int spmi_raw_cmd_ack(struct spmi_controller *ctrl, u8 opc, u8 sid,
-			  u16 param, const u8 *buf, size_t len)
-{
-	struct apple_spmi *spmi = spmi_controller_get_drvdata(ctrl);
-	u32 spmi_cmd = apple_spmi_pack_cmd(opc, sid, param);
-	u32 reply;
 	size_t i = 0, j;
 	int ret;
 
@@ -136,15 +91,48 @@ static int spmi_raw_cmd_ack(struct spmi_controller *ctrl, u8 opc, u8 sid,
 
 	reply = readl(spmi->regs + SPMI_RSP_REG);
 
+	/* Read SPMI data reply */
+	while (len_read < ilen) {
+		if (readl(spmi->regs + SPMI_STATUS_REG) & SPMI_RX_FIFO_EMPTY) {
+			/* a bug in the driver might've desync'ed the controller's FSM */
+			dev_err(&ctrl->dev, "FIFO lacks reply data, controller stuck?\n");
+			return -EIO;
+		}
+		rsp = readl(spmi->regs + SPMI_RSP_REG);
+		i = 0;
+		while ((len_read < ilen) && (i < 4)) {
+			ibuf[len_read++] = ((0xff << (8 * i)) & rsp) >> (8 * i);
+			i += 1;
+		}
+	}
+
 	if (!(readl(spmi->regs + SPMI_STATUS_REG) & SPMI_RX_FIFO_EMPTY))
 		/* a bug in the driver might've desync'ed the controller's FSM */
 		dev_warn(&ctrl->dev, "FIFO has extra data\n");
 
-	if (!(reply & SPMI_REPLY_ACK)) {
+	if (!ilen && !(reply & SPMI_REPLY_ACK)) {
 		dev_err(&ctrl->dev, "command not acknowledged\n");
 		return -EIO;
 	}
+	if ((~reply >> SPMI_REPLY_FRAME_PARITY_OFFSET) & ((1 << ilen) - 1)) {
+		dev_err(&ctrl->dev, "some frames failed parity check\n");
+		return -EIO;
+	}
 	return 0;
+}
+
+/* Send a raw command with 1..16 input data frames */
+static int spmi_raw_cmd_input(struct spmi_controller *ctrl, u8 opc, u8 sid,
+			 u16 param, u8 *buf, size_t len)
+{
+	return spmi_raw_cmd(ctrl, opc, sid, param, NULL, 0, buf, len);
+}
+
+/* Send a raw command with (optional) body and an input ACK */
+static int spmi_raw_cmd_ack(struct spmi_controller *ctrl, u8 opc, u8 sid,
+			  u16 param, const u8 *buf, size_t len)
+{
+	return spmi_raw_cmd(ctrl, opc, sid, param, buf, len, NULL, 0);
 }
 
 static int spmi_read_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
