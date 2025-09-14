@@ -42,9 +42,9 @@ struct apple_spmi {
 	readl_poll_timeout((spmi)->regs + (reg), (val), (cond), \
 			   REG_POLL_INTERVAL_US, REG_POLL_TIMEOUT_US)
 
-static inline u32 apple_spmi_pack_cmd(u8 opc, u8 sid, u16 saddr, size_t len)
+static inline u32 apple_spmi_pack_cmd(u8 opc, u8 sid, u16 param)
 {
-	return opc | sid << 8 | saddr << 16 | (len - 1) | (1 << 15);
+	return opc | sid << 8 | param << 16 | (1 << 15);
 }
 
 /* Wait for Rx FIFO to have something */
@@ -64,11 +64,12 @@ static int apple_spmi_wait_rx_not_empty(struct spmi_controller *ctrl)
 	return 0;
 }
 
-static int spmi_read_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
-			 u16 saddr, u8 *buf, size_t len)
+/* Send a raw command with 1..16 input data frames */
+static int spmi_raw_cmd_input(struct spmi_controller *ctrl, u8 opc, u8 sid,
+			 u16 param, u8 *buf, size_t len)
 {
 	struct apple_spmi *spmi = spmi_controller_get_drvdata(ctrl);
-	u32 spmi_cmd = apple_spmi_pack_cmd(opc, sid, saddr, len);
+	u32 spmi_cmd = apple_spmi_pack_cmd(opc, sid, param);
 	u32 reply, rsp;
 	size_t len_read = 0;
 	u8 i;
@@ -108,11 +109,12 @@ static int spmi_read_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
 	return 0;
 }
 
-static int spmi_write_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
-			  u16 saddr, const u8 *buf, size_t len)
+/* Send a raw command with (optional) body and an input ACK */
+static int spmi_raw_cmd_ack(struct spmi_controller *ctrl, u8 opc, u8 sid,
+			  u16 param, const u8 *buf, size_t len)
 {
 	struct apple_spmi *spmi = spmi_controller_get_drvdata(ctrl);
-	u32 spmi_cmd = apple_spmi_pack_cmd(opc, sid, saddr, len);
+	u32 spmi_cmd = apple_spmi_pack_cmd(opc, sid, param);
 	u32 reply;
 	size_t i = 0, j;
 	int ret;
@@ -145,6 +147,47 @@ static int spmi_write_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
 	return 0;
 }
 
+static int spmi_read_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
+			 u16 saddr, u8 *buf, size_t len)
+{
+	int ret = -EINVAL;
+	if ((opc & GENMASK(7, 4)) == SPMI_CMD_EXT_READ && (len - 1) < 0x10) {
+		ret = spmi_raw_cmd_input(ctrl, SPMI_CMD_EXT_READ | (len - 1), sid, saddr, buf, len);
+	} else if ((opc & GENMASK(7, 3)) == SPMI_CMD_EXT_READL && (len - 1) < 0x8) {
+		ret = spmi_raw_cmd_input(ctrl, SPMI_CMD_EXT_READL | (len - 1), sid, saddr, buf, len);
+	} else if ((opc & GENMASK(7, 5)) == SPMI_CMD_READ && len == 1 && saddr < 0x20) {
+		ret = spmi_raw_cmd_input(ctrl, SPMI_CMD_READ | saddr, sid, saddr, buf, len);
+	}
+	return ret;
+}
+
+static int spmi_write_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid,
+			  u16 saddr, const u8 *buf, size_t len)
+{
+	int ret = -EINVAL;
+	if ((opc & GENMASK(7, 4)) == SPMI_CMD_EXT_WRITE && (len - 1) < 0x10) {
+		ret = spmi_raw_cmd_ack(ctrl, SPMI_CMD_EXT_WRITE | (len - 1), sid, saddr, buf, len);
+	} else if ((opc & GENMASK(7, 3)) == SPMI_CMD_EXT_WRITEL && (len - 1) < 0x8) {
+		ret = spmi_raw_cmd_ack(ctrl, SPMI_CMD_EXT_WRITEL | (len - 1), sid, saddr, buf, len);
+	} else if ((opc & GENMASK(7, 5)) == SPMI_CMD_WRITE && len == 1 && saddr < 0x20) {
+		ret = spmi_raw_cmd_ack(ctrl, SPMI_CMD_WRITE | saddr, sid, buf[0] << 8 | saddr, NULL, 0);
+	} else if ((opc & GENMASK(7, 7)) == SPMI_CMD_ZERO_WRITE && len == 1 && saddr == 0) {
+		ret = spmi_raw_cmd_ack(ctrl, SPMI_CMD_ZERO_WRITE | buf[0], sid, buf[0] << 8 | saddr, NULL, 0);
+	}
+	return ret;
+}
+
+static int spmi_cmd(struct spmi_controller *ctrl, u8 opc, u8 sid)
+{
+	int ret = -EINVAL;
+	if (
+		opc == SPMI_CMD_RESET || opc == SPMI_CMD_SLEEP ||
+		opc == SPMI_CMD_SHUTDOWN || opc == SPMI_CMD_WAKEUP
+	)
+		ret = spmi_raw_cmd_ack(ctrl, opc, sid, 0, NULL, 0);
+	return ret;
+}
+
 static int apple_spmi_probe(struct platform_device *pdev)
 {
 	struct apple_spmi *spmi;
@@ -165,6 +208,7 @@ static int apple_spmi_probe(struct platform_device *pdev)
 
 	ctrl->read_cmd = spmi_read_cmd;
 	ctrl->write_cmd = spmi_write_cmd;
+	ctrl->cmd = spmi_cmd;
 
 	ret = devm_spmi_controller_add(&pdev->dev, ctrl);
 	if (ret)
