@@ -85,6 +85,11 @@ struct spmi_controller {
 			    u8 sid, u16 addr, u8 *buf, size_t len);
 	int	(*write_cmd)(struct spmi_controller *ctrl, u8 opcode,
 			     u8 sid, u16 addr, const u8 *buf, size_t len);
+
+	struct dentry		*dfs_dir;
+	u8		dfs_opc;
+	u8		dfs_sid;
+	u16		dfs_saddr;
 };
 
 static inline struct spmi_controller *to_spmi_controller(struct device *d)

@@ -12,10 +12,157 @@
 #include <linux/platform_device.h>
 #include <linux/spmi.h>
 #include <linux/pm_runtime.h>
+#include <linux/debugfs.h>
 
 #include <dt-bindings/spmi/spmi.h>
 #define CREATE_TRACE_POINTS
 #include <trace/events/spmi.h>
+
+static const mode_t DFS_MODE = S_IRUSR | S_IWUSR;
+
+struct spmi_trans {
+	u32 opc;
+	u32 sid;
+	u32 saddr;
+	struct spmi_controller *ctrl;
+};
+
+static struct dentry *spmi_debug_root;
+
+static int spmi_controller_dfs_open(struct inode *inode, struct file *file)
+{
+	struct spmi_controller *ctrl = inode->i_private;
+	struct spmi_trans *trans;
+
+	/* Per file "transaction" data */
+	trans = kzalloc(sizeof(*trans), GFP_KERNEL);
+	if (!trans)
+		return -ENOMEM;
+
+	trans->opc = ctrl->dfs_opc;
+	trans->sid = ctrl->dfs_sid;
+	trans->saddr = ctrl->dfs_saddr;
+	trans->ctrl = ctrl;
+
+	file->private_data = trans;
+	return 0;
+}
+
+static int spmi_controller_dfs_close(struct inode *inode, struct file *file)
+{
+	struct spmi_trans *trans = file->private_data;
+	kfree(trans);
+	return 0;
+}
+
+static ssize_t spmi_controller_dfs_reg_read(struct file *file, char __user *buf,
+					size_t len, loff_t *ppos)
+{
+	struct spmi_trans *trans = file->private_data;
+	struct spmi_controller *ctrl = trans->ctrl;
+	u8 tmp_buf [16];
+	if (len > 16)
+		return -EINVAL;
+
+	int ret = ctrl->read_cmd(ctrl, trans->opc, trans->sid, trans->saddr + (u16)(*ppos), tmp_buf, len);
+	if (ret < 0) return ret;
+
+	if (copy_to_user(buf, tmp_buf, len))
+		return -EFAULT;
+
+	*ppos += len;
+	return len;
+}
+
+static ssize_t spmi_controller_dfs_reg_write(struct file *file,
+					 const char __user *buf,
+					 size_t len, loff_t *ppos)
+{
+	struct spmi_trans *trans = file->private_data;
+	struct spmi_controller *ctrl = trans->ctrl;
+	u8 tmp_buf [16];
+	if (len > 16)
+		return -EINVAL;
+
+	if (copy_from_user(tmp_buf, buf, len))
+		return -EFAULT;
+
+	int ret = ctrl->write_cmd(ctrl, trans->opc, trans->sid, trans->saddr + (u16)(*ppos), tmp_buf, len);
+	if (ret < 0) return ret;
+
+	*ppos += len;
+	return len;
+}
+
+static ssize_t spmi_controller_dfs_cmd_read(struct file *file, char __user *buf,
+					size_t len, loff_t *ppos)
+{
+	struct spmi_trans *trans = file->private_data;
+	struct spmi_controller *ctrl = trans->ctrl;
+
+	int ret = ctrl->cmd(ctrl, trans->opc, trans->sid);
+	if (ret < 0) return ret;
+	return 0;
+}
+
+static const struct file_operations spmi_dfs_reg_fops = {
+	.open		= spmi_controller_dfs_open,
+	.release	= spmi_controller_dfs_close,
+	.read		= spmi_controller_dfs_reg_read,
+	.write		= spmi_controller_dfs_reg_write,
+};
+
+static const struct file_operations spmi_dfs_cmd_fops = {
+	.open		= spmi_controller_dfs_open,
+	.release	= spmi_controller_dfs_close,
+	.read		= spmi_controller_dfs_cmd_read,
+};
+
+static void spmi_dfs_controller_add(struct spmi_controller *ctrl)
+{
+	struct dentry *file;
+
+	ctrl->dfs_dir = debugfs_create_dir(dev_name(&ctrl->dev),
+					   spmi_debug_root);
+	WARN_ON(!ctrl->dfs_dir);
+
+	dev_dbg(&ctrl->dev, "adding debug entries for spmi controller\n");
+
+	debugfs_create_u8("opc", DFS_MODE, ctrl->dfs_dir, &ctrl->dfs_opc);
+	debugfs_create_u8("sid", DFS_MODE, ctrl->dfs_dir, &ctrl->dfs_sid);
+	debugfs_create_u16("saddr", DFS_MODE, ctrl->dfs_dir, &ctrl->dfs_saddr);
+
+	file = debugfs_create_file("data", DFS_MODE, ctrl->dfs_dir, ctrl,
+				   &spmi_dfs_reg_fops);
+	if (WARN_ON(!file))
+		goto err_remove_fs;
+
+	file = debugfs_create_file("cmd", DFS_MODE, ctrl->dfs_dir, ctrl,
+				   &spmi_dfs_cmd_fops);
+	if (WARN_ON(!file))
+		goto err_remove_fs;
+
+	return;
+
+err_remove_fs:
+	debugfs_remove_recursive(ctrl->dfs_dir);
+}
+
+static void spmi_dfs_controller_remove(struct spmi_controller *ctrl)
+{
+	debugfs_remove_recursive(ctrl->dfs_dir);
+}
+
+static void __exit spmi_dfs_exit(void)
+{
+	debugfs_remove_recursive(spmi_debug_root);
+}
+
+static void __init spmi_dfs_init(void)
+{
+	spmi_debug_root = debugfs_create_dir("spmi", NULL);
+	WARN_ON(!spmi_debug_root);
+}
 
 static bool is_registered;
 static DEFINE_IDA(ctrl_ida);
@@ -548,6 +695,8 @@ int spmi_controller_add(struct spmi_controller *ctrl)
 	if (ret)
 		return ret;
 
+	spmi_dfs_controller_add(ctrl);
+
 	if (IS_ENABLED(CONFIG_OF))
 		of_spmi_register_devices(ctrl);
 
@@ -580,6 +729,7 @@ void spmi_controller_remove(struct spmi_controller *ctrl)
 	if (!ctrl)
 		return;
 
+	spmi_dfs_controller_remove(ctrl);
 	device_for_each_child(&ctrl->dev, NULL, spmi_ctrl_remove_device);
 	device_del(&ctrl->dev);
 }
