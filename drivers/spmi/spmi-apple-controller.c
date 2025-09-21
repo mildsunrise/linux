@@ -53,6 +53,7 @@ struct apple_spmi {
 	struct completion fifo_rx;
 	struct irq_domain *irqd;
 	raw_spinlock_t irq_mask_lock;
+	u64 irq_mask_cache [SPMI_IRQ_USER_SIZE / sizeof(u64)];
 };
 
 #define poll_reg(spmi, reg, val, cond) \
@@ -249,6 +250,7 @@ static void apple_spmi_irq_mask(struct irq_data *d)
 
 	raw_spin_lock_irqsave(&spmi->irq_mask_lock, flags);
 	apple_spmi_irq_mask_raw(spmi, d->hwirq);
+	spmi->irq_mask_cache[d->hwirq / 64] &= ~BIT(d->hwirq % 64);
 	raw_spin_unlock_irqrestore(&spmi->irq_mask_lock, flags);
 }
 
@@ -259,6 +261,7 @@ static void apple_spmi_irq_unmask(struct irq_data *d)
 
 	raw_spin_lock_irqsave(&spmi->irq_mask_lock, flags);
 	apple_spmi_irq_unmask_raw(spmi, d->hwirq);
+	spmi->irq_mask_cache[d->hwirq / 64] |= BIT(d->hwirq % 64);
 	raw_spin_unlock_irqrestore(&spmi->irq_mask_lock, flags);
 }
 
@@ -359,6 +362,13 @@ static irqreturn_t apple_spmi_irq_handler(int irq, void *dev_id)
 
 	for (offset = 0; offset < SPMI_IRQ_USER_SIZE; offset += sizeof(val)) {
 		val = readq(spmi->regs + SPMI_IRQ_ACK_BASE + offset);
+		/**
+		 * because of other masters in the bus, we're going to get a multitude of
+		 * interrupts we're not interested in. irq_resolve_mapping isn't very
+		 * optimized for the nonexistent path, so instead we mask with (a locally
+		 * cached version of) the IRQ mask
+		 */
+		val &= spmi->irq_mask_cache[offset / sizeof(val)];
 		while (val) {
 			bit = __builtin_ctzll(val);
 			generic_handle_domain_irq(spmi->irqd, offset * 8 + bit);
