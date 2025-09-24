@@ -10,6 +10,7 @@
 #include <dt-bindings/interrupt-controller/apple-aic.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/phy/phy.h>
+#include <dt-bindings/spmi/spmi.h>
 
 #include "multi-die-cpp.h"
 
@@ -549,6 +550,93 @@
 			reg = <0x13 0x0304c000 0x0 0x4000>;
 			#mux-control-cells = <1>;
 			power-domains = <&ps_atc3_usb>;
+			status = "disabled";
+		};
+
+		nub_spmi0: spmi@364714000 {
+			compatible = "apple,t6030-spmi", "apple,spmi";
+			#address-cells = <2>;
+			#size-cells = <0>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 485 IRQ_TYPE_LEVEL_HIGH>;
+			reg = <0x3 0x64714000 0x0 0x100>;
+			power-domains = <&ps_nub_spmi0>;
+			status = "disabled";
+		};
+
+		nub_spmi1: spmi@364794000 {
+			compatible = "apple,t6030-spmi", "apple,spmi";
+			#address-cells = <2>;
+			#size-cells = <0>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 495 IRQ_TYPE_LEVEL_HIGH>;
+			reg = <0x3 0x64794000 0x0 0x100>;
+			power-domains = <&ps_nub_spmi1>;
+			status = "disabled";
+		};
+
+		nub_spmi2: spmi@364814000 {
+			compatible = "apple,t6030-spmi", "apple,spmi";
+			#address-cells = <2>;
+			#size-cells = <0>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 508 IRQ_TYPE_LEVEL_HIGH>;
+			reg = <0x3 0x64814000 0x0 0x100>;
+			power-domains = <&ps_nub_spmi2>;
+			status = "disabled";
+		};
+
+		nub_spmi_a0: spmi@364908000 {
+			compatible = "apple,t6030-spmi", "apple,spmi";
+			#address-cells = <2>;
+			#size-cells = <0>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 509 IRQ_TYPE_LEVEL_HIGH>;
+			reg = <0x3 0x64908000 0x0 0x100>;
+			power-domains = <&ps_nub_spmi_a0>;
+		};
+
+		nub_spmi_a1: spmi@364a08000 {
+			compatible = "apple,t6030-spmi", "apple,spmi";
+			#address-cells = <2>;
+			#size-cells = <0>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 511 IRQ_TYPE_LEVEL_HIGH>;
+			reg = <0x3 0x64a08000 0x0 0x100>;
+			power-domains = <&ps_nub_spmi_a1>;
+		};
+
+		aop_spmi0: spmi@374894000 {
+			compatible = "apple,t6030-spmi", "apple,spmi";
+			#address-cells = <2>;
+			#size-cells = <0>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 454 IRQ_TYPE_LEVEL_HIGH>;
+			reg = <0x3 0x74894000 0x0 0x100>;
+			status = "disabled";
+		};
+
+		aop_spmi1: spmi@3748d4000 {
+			compatible = "apple,t6030-spmi", "apple,spmi";
+			#address-cells = <2>;
+			#size-cells = <0>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&aic>;
+			interrupts = <AIC_IRQ 0 458 IRQ_TYPE_LEVEL_HIGH>;
+			reg = <0x3 0x748d4000 0x0 0x100>;
 			status = "disabled";
 		};
 	};
