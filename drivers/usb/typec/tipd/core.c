@@ -6,11 +6,21 @@
  * Author: Heikki Krogerus <heikki.krogerus@linux.intel.com>
  */
 
+//TODO: remove
+#define ___USE_SPMI
+#undef ___USE_I2C
+
+#ifdef ___USE_I2C
 #include <linux/i2c.h>
+#endif
+#ifdef ___USE_SPMI
+#include <linux/spmi.h>
+#endif
 #include <linux/acpi.h>
 #include <linux/gpio/consumer.h>
 #include <linux/module.h>
 #include <linux/of.h>
+#include <linux/of_irq.h>
 #include <linux/power_supply.h>
 #include <linux/regmap.h>
 #include <linux/interrupt.h>
@@ -128,6 +138,7 @@ struct tipd_data {
 };
 
 struct tps6598x {
+	int irq; /* redundant for i2c, but spmi doesn't store it for us */
 	struct device *dev;
 	struct regmap *regmap;
 	struct mutex lock; /* device lock */
@@ -923,10 +934,14 @@ static int
 tps25750_write_firmware(struct tps6598x *tps,
 			u8 bpms_addr, const u8 *data, size_t len)
 {
+#ifdef ___USE_I2C
 	struct i2c_client *client = to_i2c_client(tps->dev);
 	int ret;
 	u8 slave_addr;
 	int timeout;
+
+	if (tps->dev->bus != i2c_bus_type)
+		goto wrong_bus;
 
 	slave_addr = client->addr;
 	timeout = client->adapter->timeout;
@@ -944,6 +959,10 @@ tps25750_write_firmware(struct tps6598x *tps,
 	client->adapter->timeout = timeout;
 
 	return ret;
+wrong_bus:
+#endif
+	dev_err(tps->dev, "wrong bus type\n");
+	return -EINVAL;
 }
 
 static int
@@ -1207,8 +1226,7 @@ release_fw:
 static ssize_t lock_show(struct device *dev, struct device_attribute *attr,
 			 char *buf)
 {
-	struct i2c_client *client = to_i2c_client(dev);
-	struct tps6598x *tps = i2c_get_clientdata(client);
+	struct tps6598x *tps = dev_get_drvdata(dev);
 
 	if (tps->cd321x_unlocked)
 		return sysfs_emit(buf, "unlocked\n");
@@ -1220,8 +1238,7 @@ static DEVICE_ATTR_RO(lock);
 static ssize_t mode_show(struct device *dev, struct device_attribute *attr,
 			 char *buf)
 {
-	struct i2c_client *client = to_i2c_client(dev);
-	struct tps6598x *tps = i2c_get_clientdata(client);
+	struct tps6598x *tps = dev_get_drvdata(dev);
 
 	int mode = tps6598x_check_mode(tps);
 	switch (mode) {
@@ -1236,8 +1253,7 @@ static DEVICE_ATTR_RO(mode);
 static ssize_t power_status_show(struct device *dev,
 				 struct device_attribute *attr, char *buf)
 {
-	struct i2c_client *client = to_i2c_client(dev);
-	struct tps6598x *tps = i2c_get_clientdata(client);
+	struct tps6598x *tps = dev_get_drvdata(dev);
 
 	return sysfs_emit(buf, "0x%04hx\n", tps->pwr_status);
 }
@@ -1334,8 +1350,7 @@ static ssize_t commad_devn(struct tps6598x *tps, const char *buf, size_t count)
 static ssize_t command_store(struct device *dev, struct device_attribute *attr,
 			  const char *buf, size_t count)
 {
-	struct i2c_client *client = to_i2c_client(dev);
-	struct tps6598x *tps = i2c_get_clientdata(client);
+	struct tps6598x *tps = dev_get_drvdata(dev);
 	int ret;
 
 	if (count < CMD_LEN)
@@ -1469,22 +1484,16 @@ tps25750_register_port(struct tps6598x *tps, struct fwnode_handle *fwnode)
 	return 0;
 }
 
-static int tps6598x_probe(struct i2c_client *client)
+static int tps6598x_probe(struct tps6598x *tps)
 {
-	struct device_node *np = client->dev.of_node;
-	struct tps6598x *tps;
+	struct device_node *np = tps->dev->of_node;
 	struct fwnode_handle *fwnode;
 	u32 status;
 	u32 vid;
 	int ret;
 	u64 mask1;
 
-	tps = devm_kzalloc(&client->dev, sizeof(*tps), GFP_KERNEL);
-	if (!tps)
-		return -ENOMEM;
-
 	mutex_init(&tps->lock);
-	tps->dev = &client->dev;
 
 	tps->reset = devm_gpiod_get_optional(tps->dev, "reset", GPIOD_OUT_LOW);
 	if (IS_ERR(tps->reset))
@@ -1493,7 +1502,6 @@ static int tps6598x_probe(struct i2c_client *client)
 	if (tps->reset)
 		msleep(TPS_SETUP_MS);
 
-	tps->regmap = devm_regmap_init_i2c(client, &tps6598x_regmap_config);
 	if (IS_ERR(tps->regmap))
 		return PTR_ERR(tps->regmap);
 
@@ -1502,13 +1510,6 @@ static int tps6598x_probe(struct i2c_client *client)
 		if (ret < 0 || !vid)
 			return -ENODEV;
 	}
-
-	/*
-	 * Checking can the adapter handle SMBus protocol. If it can not, the
-	 * driver needs to take care of block reads separately.
-	 */
-	if (i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
-		tps->i2c_protocol = true;
 
 	if (np && of_device_is_compatible(np, "apple,cd321x")) {
 		/* Switch CD321X chips to the correct system power state */
@@ -1528,7 +1529,6 @@ static int tps6598x_probe(struct i2c_client *client)
 			TPS_REG_INT_PLUG_EVENT;
 	}
 
-	tps->data = i2c_get_match_data(client);
 	if (!tps->data)
 		return -EINVAL;
 
@@ -1559,7 +1559,7 @@ static int tps6598x_probe(struct i2c_client *client)
 	 * with existing DT files, we work around this by deleting any
 	 * fwnode_links to/from this fwnode.
 	 */
-	fwnode = device_get_named_child_node(&client->dev, "connector");
+	fwnode = device_get_named_child_node(tps->dev, "connector");
 	if (fwnode)
 		fw_devlink_purge_absent_suppliers(fwnode);
 
@@ -1585,14 +1585,14 @@ static int tps6598x_probe(struct i2c_client *client)
 		}
 		ret = tps6598x_connect(tps, status);
 		if (ret)
-			dev_err(&client->dev, "failed to register partner\n");
+			dev_err(tps->dev, "failed to register partner\n");
 	}
 
-	if (client->irq) {
-		ret = devm_request_threaded_irq(&client->dev, client->irq, NULL,
+	if (tps->irq) {
+		ret = devm_request_threaded_irq(tps->dev, tps->irq, NULL,
 						tps->data->irq_handler,
 						IRQF_SHARED | IRQF_ONESHOT,
-						dev_name(&client->dev), tps);
+						dev_name(tps->dev), tps);
 	} else {
 		dev_warn(tps->dev, "Unable to find the interrupt, switching to polling\n");
 		INIT_DELAYED_WORK(&tps->wq_poll, tps6598x_poll_work);
@@ -1603,18 +1603,18 @@ static int tps6598x_probe(struct i2c_client *client)
 	if (ret)
 		goto err_disconnect;
 
-	i2c_set_clientdata(client, tps);
+	dev_set_drvdata(tps->dev, tps);
 	fwnode_handle_put(fwnode);
 
 	tps->wakeup = device_property_read_bool(tps->dev, "wakeup-source");
-	if (tps->wakeup && client->irq) {
-		devm_device_init_wakeup(&client->dev);
-		enable_irq_wake(client->irq);
+	if (tps->wakeup && tps->irq) {
+		devm_device_init_wakeup(tps->dev);
+		enable_irq_wake(tps->irq);
 	}
 
 	if (device_is_compatible(tps->dev, "apple,cd321x")) {
 		int err;
-		err = sysfs_create_group(&client->dev.kobj, &vdm_group);
+		err = sysfs_create_group(&tps->dev->kobj, &vdm_group);
 		if (err < 0)
 			dev_err(tps->dev, "Couldn't register sysfs group for "
 				"CD321x VDMs\n");
@@ -1639,17 +1639,15 @@ err_reset_controller:
 	return ret;
 }
 
-static void tps6598x_remove(struct i2c_client *client)
+static void tps6598x_remove(struct tps6598x *tps)
 {
-	struct tps6598x *tps = i2c_get_clientdata(client);
-
 	if (device_is_compatible(tps->dev, "apple,cd321x"))
-		sysfs_remove_group(&client->dev.kobj, &vdm_group);
+		sysfs_remove_group(&tps->dev->kobj, &vdm_group);
 
-	if (!client->irq)
+	if (!tps->irq)
 		cancel_delayed_work_sync(&tps->wq_poll);
 	else
-		devm_free_irq(tps->dev, client->irq, tps);
+		devm_free_irq(tps->dev, tps->irq, tps);
 
 	tps6598x_disconnect(tps, 0);
 	typec_unregister_port(tps->port);
@@ -1664,17 +1662,16 @@ static void tps6598x_remove(struct i2c_client *client)
 
 static int __maybe_unused tps6598x_suspend(struct device *dev)
 {
-	struct i2c_client *client = to_i2c_client(dev);
-	struct tps6598x *tps = i2c_get_clientdata(client);
+	struct tps6598x *tps = dev_get_drvdata(dev);
 
 	if (tps->wakeup) {
-		disable_irq(client->irq);
-		enable_irq_wake(client->irq);
+		disable_irq(tps->irq);
+		enable_irq_wake(tps->irq);
 	} else if (tps->reset) {
 		gpiod_set_value_cansleep(tps->reset, 1);
 	}
 
-	if (!client->irq)
+	if (!tps->irq)
 		cancel_delayed_work_sync(&tps->wq_poll);
 
 	return 0;
@@ -1682,8 +1679,7 @@ static int __maybe_unused tps6598x_suspend(struct device *dev)
 
 static int __maybe_unused tps6598x_resume(struct device *dev)
 {
-	struct i2c_client *client = to_i2c_client(dev);
-	struct tps6598x *tps = i2c_get_clientdata(client);
+	struct tps6598x *tps = dev_get_drvdata(dev);
 	int ret;
 
 	ret = tps6598x_check_mode(tps);
@@ -1697,14 +1693,14 @@ static int __maybe_unused tps6598x_resume(struct device *dev)
 	}
 
 	if (tps->wakeup) {
-		disable_irq_wake(client->irq);
-		enable_irq(client->irq);
+		disable_irq_wake(tps->irq);
+		enable_irq(tps->irq);
 	} else if (tps->reset) {
 		gpiod_set_value_cansleep(tps->reset, 0);
 		msleep(TPS_SETUP_MS);
 	}
 
-	if (!client->irq)
+	if (!tps->irq)
 		queue_delayed_work(system_power_efficient_wq, &tps->wq_poll,
 				   msecs_to_jiffies(POLL_INTERVAL));
 
@@ -1752,6 +1748,35 @@ static const struct of_device_id tps6598x_of_match[] = {
 };
 MODULE_DEVICE_TABLE(of, tps6598x_of_match);
 
+#ifdef ___USE_I2C
+static int tps6598x_probe_i2c(struct i2c_client *client)
+{
+	struct tps6598x *tps;
+
+	tps = devm_kzalloc(&client->dev, sizeof(*tps), GFP_KERNEL);
+	if (!tps)
+		return -ENOMEM;
+
+	tps->dev = &client->dev;
+	tps->irq = client->irq;
+	tps->regmap = devm_regmap_init_i2c(client, &tps6598x_regmap_config);
+	tps->data = i2c_get_match_data(client);
+
+	/*
+	 * Checking can the adapter handle SMBus protocol. If it can not, the
+	 * driver needs to take care of block reads separately.
+	 */
+	if (i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
+		tps->i2c_protocol = true;
+
+	return tps6598x_probe(tps);
+}
+
+static void tps6598x_remove_i2c(struct i2c_client *client)
+{
+	tps6598x_remove(dev_get_drvdata(&client->dev));
+}
+
 static const struct i2c_device_id tps6598x_id[] = {
 	{ "tps6598x", (kernel_ulong_t)&tps6598x_data },
 	{ }
@@ -1764,11 +1789,183 @@ static struct i2c_driver tps6598x_i2c_driver = {
 		.pm = &tps6598x_pm_ops,
 		.of_match_table = tps6598x_of_match,
 	},
-	.probe = tps6598x_probe,
-	.remove = tps6598x_remove,
+	.probe = tps6598x_probe_i2c,
+	.remove = tps6598x_remove_i2c,
 	.id_table = tps6598x_id,
 };
-module_i2c_driver(tps6598x_i2c_driver);
+#endif
+
+#ifdef ___USE_SPMI
+static int regmap_tipd_spmi_select(struct spmi_device *spmi_dev, u8 reg, u8 size)
+{
+	int ret;
+	u8 value;
+
+	if (reg >= 0x80)
+		return -EINVAL;
+
+	ret = spmi_register_zero_write(spmi_dev, reg);
+	if (ret < 0)
+		return ret;
+
+	while (true) {
+		ret = spmi_register_read(spmi_dev, 0, &value);
+		if (ret < 0)
+			return ret;
+		/* if this happens there's likely a bug, like failing to wake up the hardware */
+		if ((value & 0x7F) != reg)
+			return -EIO;
+		if (!(value >> 7))
+			break;
+	}
+
+	ret = spmi_register_read(spmi_dev, 0x1F, &value);
+	if (ret < 0)
+		return ret;
+	if (value < size)
+		return -EINVAL;
+
+	return 0;
+}
+
+static int regmap_tipd_spmi_write(void *context, const void *_data,
+				      size_t count)
+{
+	struct spmi_device *spmi_dev = context;
+	const u8 *data = _data;
+	size_t offset = 0;
+	int ret;
+
+	--count;
+	if (count > 64)
+		return -EINVAL;
+
+	ret = regmap_tipd_spmi_select(spmi_dev, data[0], count);
+	if (ret < 0)
+		return ret;
+
+	++data;
+	while (offset < count) {
+		ret = spmi_ext_register_write(spmi_dev, 0x20 + offset, data + offset, min(count - offset, 16));
+		if (ret < 0)
+			return 0;
+		offset += min(count - offset, 16);
+	}
+	return 0;
+}
+
+static int regmap_tipd_spmi_read(void *context, const void *reg,
+				     size_t reg_size, void *val,
+				     size_t val_size)
+{
+	struct spmi_device *spmi_dev = context;
+	u8 *data = val;
+	size_t offset = 0;
+	int ret;
+
+	if (reg_size != 1 || val_size > 64)
+		return -EINVAL;
+
+	ret = regmap_tipd_spmi_select(spmi_dev, ((u8 *)reg)[0], val_size);
+	if (ret < 0)
+		return ret;
+
+	while (offset < val_size) {
+		ret = spmi_ext_register_read(spmi_dev, 0x20 + offset, data + offset, min(val_size - offset, 16));
+		if (ret < 0)
+			return 0;
+		offset += min(val_size - offset, 16);
+	}
+	return 0;
+}
+
+static const struct regmap_bus regmap_tipd_spmi = {
+	.read				= regmap_tipd_spmi_read,
+	.write				= regmap_tipd_spmi_write,
+	.max_raw_read = 64,
+	.max_raw_write = 64,
+};
+
+static struct regmap *__devm_regmap_init_tipd_spmi(struct spmi_device *sdev,
+					    const struct regmap_config *config,
+					    struct lock_class_key *lock_key,
+					    const char *lock_name)
+{
+	return __devm_regmap_init(&sdev->dev, &regmap_tipd_spmi, sdev, config,
+				  lock_key, lock_name);
+}
+
+#define devm_regmap_init_tipd_spmi(dev, config)				\
+	__regmap_lockdep_wrapper(__devm_regmap_init_tipd_spmi, #config,	\
+				dev, config)
+
+static int tps6598x_probe_spmi(struct spmi_device *spmi_dev)
+{
+	struct device_node *np = spmi_dev->dev.of_node;
+	struct tps6598x *tps;
+
+	tps = devm_kzalloc(&spmi_dev->dev, sizeof(*tps), GFP_KERNEL);
+	if (!tps)
+		return -ENOMEM;
+
+	tps->dev = &spmi_dev->dev;
+	tps->irq = of_irq_get_byname(np, "irq");
+	if (tps->irq < 0)
+		return tps->irq;
+	tps->regmap = devm_regmap_init_tipd_spmi(spmi_dev, &tps6598x_regmap_config);
+	tps->data = device_get_match_data(&spmi_dev->dev);
+
+	return tps6598x_probe(tps);
+}
+
+static void tps6598x_remove_spmi(struct spmi_device *spmi_dev)
+{
+	tps6598x_remove(dev_get_drvdata(&spmi_dev->dev));
+}
+
+static struct spmi_driver tps6598x_spmi_driver = {
+	.driver = {
+		.name = "tps6598x",
+		.pm = &tps6598x_pm_ops,
+		.of_match_table = tps6598x_of_match,
+	},
+	.probe = tps6598x_probe_spmi,
+	.remove = tps6598x_remove_spmi,
+};
+#endif
+
+static int __init tps6598x_driver_init(void)
+{
+	int ret;
+
+#ifdef ___USE_I2C
+	ret = i2c_add_driver(&tps6598x_i2c_driver);
+	if (ret < 0)
+		return ret;
+#endif
+
+#ifdef ___USE_SPMI
+	ret = spmi_driver_register(&tps6598x_spmi_driver);
+	if (ret < 0)
+		return ret;
+#endif
+
+	return ret;
+}
+
+static void __exit tps6598x_driver_exit(void)
+{
+#ifdef ___USE_I2C
+	i2c_del_driver(&tps6598x_i2c_driver);
+#endif
+
+#ifdef ___USE_SPMI
+	spmi_driver_unregister(&tps6598x_spmi_driver);
+#endif
+}
+
+module_init(tps6598x_driver_init);
+module_exit(tps6598x_driver_exit);
 
 MODULE_AUTHOR("Heikki Krogerus <heikki.krogerus@linux.intel.com>");
 MODULE_LICENSE("GPL v2");
