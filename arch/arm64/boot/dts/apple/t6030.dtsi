@@ -809,6 +809,18 @@
 			      <0x3 0x51040000 0x0 0x4000>;
 			reg-names = "core", "event";
 			power-domains = <&ps_aic>;
+
+			affinities {
+				e-core-pmu-affinity {
+					apple,fiq-index = <AIC_CPU_PMU_E>;
+					cpus = <&cpu_e00 &cpu_e01 &cpu_e02 &cpu_e03 &cpu_e04 &cpu_e05>;
+				};
+
+				p-core-pmu-affinity {
+					apple,fiq-index = <AIC_CPU_PMU_P>;
+					cpus = <&cpu_p00 &cpu_p01 &cpu_p02 &cpu_p03 &cpu_p04 &cpu_p05>;
+				};
+			};
 		};
 
 		pinctrl_nub: pinctrl@3641f0000 {

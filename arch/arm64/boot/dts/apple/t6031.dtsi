@@ -50,3 +50,19 @@
 
 #undef DIE
 #undef DIE_NO
+
+
+&aic {
+	affinities {
+		e-core-pmu-affinity {
+			apple,fiq-index = <AIC_CPU_PMU_E>;
+			cpus = <&cpu_e00 &cpu_e01 &cpu_e02 &cpu_e03>;
+		};
+
+		p-core-pmu-affinity {
+			apple,fiq-index = <AIC_CPU_PMU_P>;
+			cpus = <&cpu_p00 &cpu_p01 &cpu_p02 &cpu_p03 &cpu_p04 &cpu_p05
+				&cpu_p10 &cpu_p11 &cpu_p12 &cpu_p13 &cpu_p14 &cpu_p15>;
+		};
+	};
+};
